@@ -1,0 +1,85 @@
+name: 部署 Hugo 博客
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+  repository_dispatch:
+    types: [post-updated]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. 拉取 zgtblog（Hugo 源码）
+      - uses: actions/checkout@v4
+
+      # 2. 拉取 gt_vault 私有仓库
+      - name: 拉取私有仓库
+        uses: actions/checkout@v4
+        with:
+          repository: Guangtao2017/gt_vault
+          path: temp-notes
+          token: ${{ secrets.GH_PAT }}
+          fetch-depth: 1
+
+      # 3. 同步文章和图片（方案一）
+      - name: 同步文章和图片
+        run: |
+          PUBLISHED_DIR="temp-notes/自媒体/published"
+          ASSETS_DIR="temp-notes/自媒体/assets"
+          
+          # 检查文章文件夹是否存在
+          if [ ! -d "$PUBLISHED_DIR" ]; then
+            echo "⚠️ 文章文件夹不存在: $PUBLISHED_DIR"
+            exit 1
+          fi
+          
+          # 清空 Hugo 的 posts 目录
+          rm -rf content/posts/*
+          
+          # 复制所有 .md 文章
+          cp $PUBLISHED_DIR/*.md content/posts/ 2>/dev/null || true
+          echo "✅ 文章复制完成"
+          
+          # 复制图片到 Hugo 的 static/images/
+          if [ -d "$ASSETS_DIR" ]; then
+            mkdir -p static/images
+            cp -r $ASSETS_DIR/* static/images/ 2>/dev/null || true
+            echo "✅ 图片复制完成"
+          else
+            echo "⚠️ 图片文件夹不存在: $ASSETS_DIR"
+          fi
+          
+          # 自动替换图片路径：../assets/ → /images/
+          sed -i 's|\.\./assets/|/images/|g' content/posts/*.md 2>/dev/null || true
+          echo "✅ 路径替换完成"
+
+      # 4. 清理临时文件
+      - name: 清理
+        run: rm -rf temp-notes
+
+      # 5. 构建 Hugo
+      - uses: peaceiris/actions-hugo@v2
+        with:
+          hugo-version: "0.164.0"
+      - run: hugo --minify
+
+      # 6. 上传构建产物
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/deploy-pages@v4
