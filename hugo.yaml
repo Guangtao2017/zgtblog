@@ -1,5 +1,5 @@
 # hugo.yaml
-baseURL: 'baseURL:https://guangtao2017.github.io/zgtblog/'
+baseURL: 'https://guangtao2017.github.io/zgtblog/'
 languageCode: 'zh-cn'
 title: '我的技术博客'
 theme: 'PaperMod'
