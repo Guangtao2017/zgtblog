@@ -25,7 +25,7 @@ jobs:
         with:
           repository: Guangtao2017/gt_vault
           path: temp-notes
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.BLOG_SECRET  }}
           fetch-depth: 1
 
       # 3. 同步文章和图片（方案一）
