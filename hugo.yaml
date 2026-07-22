@@ -1,0 +1,26 @@
+# hugo.yaml
+baseURL: 'http://localhost:1313/'
+languageCode: 'zh-cn'
+title: '我的技术博客'
+theme: 'PaperMod'
+
+# 禁用 RSS
+disableRSS: true
+
+# 分页设置
+paginate: 5
+
+params:
+  description: '记录技术点滴，分享编程思考'
+  author: '你的名字'
+
+menu:
+  main:
+    - identifier: home
+      name: 首页
+      url: /
+      weight: 10
+    - identifier: posts
+      name: 文章
+      url: /posts/
+      weight: 20
