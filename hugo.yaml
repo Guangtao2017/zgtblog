@@ -1,5 +1,5 @@
 # hugo.yaml
-baseURL: 'http://localhost:1313/'
+baseURL: 'baseURL:https://zhoughtblog.pages.dev/'
 languageCode: 'zh-cn'
 title: '我的技术博客'
 theme: 'PaperMod'
