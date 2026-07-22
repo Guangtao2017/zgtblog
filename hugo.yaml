@@ -8,7 +8,7 @@ theme: 'PaperMod'
 disableRSS: true
 
 # 分页设置
-paginate: 5
+pagination.pagerSize: 5
 
 params:
   description: '记录技术点滴，分享编程思考'
