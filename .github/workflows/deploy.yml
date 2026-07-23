@@ -26,31 +26,24 @@ jobs:
           token: ${{ secrets.BLOG_SECRET }}
           fetch-depth: 1
 
-      - name: 同步文章和图片
+    - name: 同步文章和图片
         run: |
           PUBLISHED_DIR="temp-notes/自媒体/published"
           ASSETS_DIR="temp-notes/自媒体/published/assets"
           
-          if [ ! -d "$PUBLISHED_DIR" ]; then
-            echo "❌ 文章文件夹不存在: $PUBLISHED_DIR"
-            exit 1
-          fi
-          
+          # 同步文章（先清空再复制）
           rm -rf content/posts/*
           cp $PUBLISHED_DIR/*.md content/posts/ 2>/dev/null || true
-          echo "✅ 文章复制完成"
           
+          # 同步图片（使用 rsync 实现镜像同步）
           if [ -d "$ASSETS_DIR" ]; then
-            mkdir -p static
-            cp -r $ASSETS_DIR/* static/
-            echo "✅ 图片复制完成"
-          else
-            echo "❌ 图片文件夹不存在: $ASSETS_DIR"
-            exit 1
+            mkdir -p public/assets
+            # rsync 会删除 public/assets 里源目录没有的文件
+            rsync -av --delete $ASSETS_DIR/ public/assets/
+            echo "✅ 图片同步完成（已删除多余文件）"
           fi
           
           sed -i 's|assets/|/assets/|g' content/posts/*.md 2>/dev/null || true
-          echo "✅ 路径替换完成"
 
       - name: 清理
         run: rm -rf temp-notes
