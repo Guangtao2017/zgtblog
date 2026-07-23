@@ -11,6 +11,10 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  
+params:
+  # ... 其他配置
+  externalLinkTarget: "_blank"
 
 jobs:
   build:
