@@ -32,32 +32,27 @@ jobs:
       - name: 同步文章和图片
         run: |
           PUBLISHED_DIR="temp-notes/自媒体/published"
-          ASSETS_DIR="temp-notes/自媒体/assets"
+          ASSETS_DIR="temp-notes/自媒体/published/assets"
           
-          # 检查文章文件夹是否存在
           if [ ! -d "$PUBLISHED_DIR" ]; then
             echo "⚠️ 文章文件夹不存在: $PUBLISHED_DIR"
             exit 1
           fi
           
-          # 清空 Hugo 的 posts 目录
           rm -rf content/posts/*
-          
-          # 复制所有 .md 文章
           cp $PUBLISHED_DIR/*.md content/posts/ 2>/dev/null || true
           echo "✅ 文章复制完成"
           
-          # 复制图片到 Hugo 的 static/images/
           if [ -d "$ASSETS_DIR" ]; then
-            mkdir -p static/images
-            cp -r $ASSETS_DIR/* static/images/ 2>/dev/null || true
+            mkdir -p static
+            cp -r $ASSETS_DIR/* static/ 2>/dev/null || true
             echo "✅ 图片复制完成"
           else
             echo "⚠️ 图片文件夹不存在: $ASSETS_DIR"
           fi
           
-          # 自动替换图片路径：../assets/ → /images/
-          sed -i 's|\.\./assets/|/images/|g' content/posts/*.md 2>/dev/null || true
+          # 替换图片路径：assets/ → /assets/
+          sed -i 's|assets/|/assets/|g' content/posts/*.md 2>/dev/null || true
           echo "✅ 路径替换完成"
 
       # 4. 清理临时文件
