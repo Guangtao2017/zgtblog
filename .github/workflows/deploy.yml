@@ -26,34 +26,44 @@ jobs:
           token: ${{ secrets.BLOG_SECRET }}
           fetch-depth: 1
 
-    - name: 同步文章和图片
+      - name: 同步文章和图片
         run: |
           PUBLISHED_DIR="temp-notes/自媒体/published"
           ASSETS_DIR="temp-notes/自媒体/published/assets"
           
-          # 同步文章（先清空再复制）
+          if [ ! -d "$PUBLISHED_DIR" ]; then
+            echo "❌ 文章文件夹不存在: $PUBLISHED_DIR"
+            exit 1
+          fi
+          
           rm -rf content/posts/*
           cp $PUBLISHED_DIR/*.md content/posts/ 2>/dev/null || true
+          echo "✅ 文章复制完成"
           
-          # 同步图片（使用 rsync 实现镜像同步）
           if [ -d "$ASSETS_DIR" ]; then
             mkdir -p public/assets
-            # rsync 会删除 public/assets 里源目录没有的文件
             rsync -av --delete $ASSETS_DIR/ public/assets/
-            echo "✅ 图片同步完成（已删除多余文件）"
+            echo "✅ 图片同步完成"
+          else
+            echo "⚠️ 图片文件夹不存在: $ASSETS_DIR"
           fi
           
           sed -i 's|assets/|/assets/|g' content/posts/*.md 2>/dev/null || true
+          echo "✅ 路径替换完成"
 
-      - name: 清理
+      - name: 清理临时文件
         run: rm -rf temp-notes
 
-      - uses: peaceiris/actions-hugo@v2
+      - name: 安装 Hugo
+        uses: peaceiris/actions-hugo@v2
         with:
           hugo-version: "0.164.0"
-      - run: hugo --minify
 
-      - uses: actions/upload-pages-artifact@v3
+      - name: 构建 Hugo
+        run: hugo --minify
+
+      - name: 上传构建产物
+        uses: actions/upload-pages-artifact@v3
         with:
           path: public
 
