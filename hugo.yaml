@@ -12,7 +12,9 @@ pagination.pagerSize: 5
 
 params:
   description: '记录技术点滴，分享编程思考'
-  author: '你的名字'
+  author: 'tao zhou'
+  # ... 其他配置
+  externalLinkTarget: "_blank"
 
 menu:
   main:
