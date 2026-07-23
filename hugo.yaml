@@ -14,8 +14,7 @@ params:
   description: '记录技术点滴，分享编程思考'
   author: 'tao zhou'
   hideFooter: true   # 加这行
-  # ... 其他配置
-  externalLinkTarget: _blank
+  externalLinkTarget: _blank   # ... 其他配置
 
 menu:
   main:
