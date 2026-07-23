@@ -26,47 +26,32 @@ jobs:
           token: ${{ secrets.BLOG_SECRET }}
           fetch-depth: 1
 
-      - name: 同步文章
+      - name: 同步文章和图片
         run: |
           PUBLISHED_DIR="temp-notes/自媒体/published"
-          
-          if [ ! -d "$PUBLISHED_DIR" ]; then
-            echo "❌ 文章文件夹不存在: $PUBLISHED_DIR"
-            exit 1
-          fi
+          ASSETS_DIR="temp-notes/自媒体/published/assets"
           
           rm -rf content/posts/*
           cp $PUBLISHED_DIR/*.md content/posts/ 2>/dev/null || true
-          echo "✅ 文章复制完成"
           
-          # 替换图片路径：assets/ → /assets/
           sed -i 's|assets/|/assets/|g' content/posts/*.md 2>/dev/null || true
-          echo "✅ 路径替换完成"
+          
+          if [ -d "$ASSETS_DIR" ]; then
+            mkdir -p static/assets
+            cp -r $ASSETS_DIR/* static/assets/
+            echo "✅ 图片复制到 static/assets"
+          fi
 
       - name: 清理临时文件
         run: rm -rf temp-notes
 
-      - name: 安装 Hugo
-        uses: peaceiris/actions-hugo@v2
+      - uses: peaceiris/actions-hugo@v2
         with:
           hugo-version: "0.164.0"
 
-      - name: 构建 Hugo
-        run: hugo --minify
+      - run: hugo --minify
 
-      - name: 复制图片到 public
-        run: |
-          ASSETS_DIR="temp-notes/自媒体/published/assets"
-          if [ -d "$ASSETS_DIR" ]; then
-            mkdir -p public/assets
-            cp -r $ASSETS_DIR/* public/assets/
-            echo "✅ 图片复制完成"
-          else
-            echo "⚠️ 图片文件夹不存在: $ASSETS_DIR"
-          fi
-
-      - name: 上传构建产物
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: public
 
